@@ -149,11 +149,33 @@ def err(def cl) {
 }
 
 def l(def s) {
-  Eval.me(s.replace(',', '')
+  Eval.me(s.replace('\n', ' ')
+  .replace(',', '')
   .replace('(', '[')
   .replace(')', ']')
+  .replaceAll(/\s+/, ' ')
+  .replaceAll(/]\s+]/, ']]')
+  .replaceAll(/\[\s+\[/, '[[')
+  .replaceAll(/\[\s(\d+)/, '[$1')
+  .replaceAll(/(\d+) \]/, '$1]')
   .split()
   .join(', '))
+}
+
+def p(def s) {
+  def r = []
+  def k = new Stack<Integer>()
+  s.chars.eachWithIndex { def c, def i ->
+    if (c =~ /\[|\(/) {
+      k.push(i)
+    } else if (c =~ /\]|\)/) {
+      def h = k.pop()
+      if (k.empty) {
+        r << s[h..i]
+      }
+    }
+  }
+  r
 }
 
 assert n(1) == 1
@@ -288,8 +310,12 @@ assert err { tar(n(1)) }
 assert l('[1 2 [3 4] [5 6]]') == [1, 2, [3, 4], [5, 6]]
 assert l('(1 (2 3) (4 5 6))') == [1, [2, 3], [4, 5, 6]]
 
+assert p('[1 [2 3]] [4 [5 6]]') == ['[1 [2 3]]', '[4 [5 6]]']
+
 System.in.withReader { r ->
   System.out.withPrintWriter { o ->
-    o.println(tar(n(l(r.readLine()))))
+    p(r.text).each {
+      o.println(tar(n(l(it))))
+    }
   }
 }

@@ -150,10 +150,10 @@ def err(def cl) {
 
 def l(def s) {
   Eval.me(s.replace(',', '')
-	.replace('(', '[')
-	.replace(')', ']')
-	.split()
-	.join(', '))
+  .replace('(', '[')
+  .replace(')', ']')
+  .split()
+  .join(', '))
 }
 
 assert n(1) == 1

@@ -157,6 +157,10 @@ def inf(def cl) {
 }
 
 def l(def s) {
+  s = s.readLines().collect {
+    def i = it.indexOf(';')
+    i != -1 ? it.substring(0, i) : it
+  }.join()
   Eval.me(s.replace('\n', ' ')
   .replace(',', '')
   .replace('(', '[')
@@ -316,6 +320,26 @@ assert ill { fas(n(1)) }
 assert ill { tar(n(1)) }
 
 assert inf { tar(n([[7, [0, 1], [9, 1, [0, 1]]], [9, 1, [0, 1,]]])) }
+assert tar(n(l('''
+[
+  [
+    0
+    [
+      6
+      ; builds a cell like [100 x] where x is the subject's head atom
+      ; compares the cell's atoms with = (=[100 x])
+      [8 [[1 100] [0 2]] [5 [0 2]]]
+      ; if the comparison evaluates to 0 the subject's head atom is returned
+      [0 2]
+      ; otherwise a new subject is built where the original subject's head atom
+      ; is replaced with its incremented value, then the same formula will be
+      ; invoked on the new subject resulting in a recursion
+      [9 3 [[7 [0 2] [4 0 1]] [0 3]]]
+    ]
+  ]
+  [9 3 [0 1]]
+]
+'''))) == 100
 
 assert l('[1 2 [3 4] [5 6]]') == [1, 2, [3, 4], [5, 6]]
 assert l('(1 (2 3) (4 5 6))') == [1, [2, 3], [4, 5, 6]]

@@ -139,13 +139,21 @@ def tar(def a) {
   }
 }
 
-def err(def cl) {
+def err(def cl, def e) {
   try {
     cl()
     false
-  } catch (IllegalStateException) {
-    true
+  } catch (Throwable t) {
+    t in e
   }
+}
+
+def ill(def cl) {
+  err(cl, IllegalStateException)
+}
+
+def inf(def cl) {
+  err(cl, StackOverflowError)
 }
 
 def l(def s) {
@@ -216,15 +224,15 @@ assert fas(n([4, x])) == 4
 assert fas(n([5, x])) == 5
 assert fas(n([6, x])) == 6
 assert fas(n([7, x])) == [14, 15]
-assert err { fas(n([8, x])) }
-assert err { fas(n([9, x])) }
-assert err { fas(n([10, x])) }
-assert err { fas(n([11, x])) }
-assert err { fas(n([12, x])) }
-assert err { fas(n([13, x])) }
+assert ill { fas(n([8, x])) }
+assert ill { fas(n([9, x])) }
+assert ill { fas(n([10, x])) }
+assert ill { fas(n([11, x])) }
+assert ill { fas(n([12, x])) }
+assert ill { fas(n([13, x])) }
 assert fas(n([14, x])) == 14
 assert fas(n([15, x])) == 15
-assert err { fas(n([16, x])) }
+assert ill { fas(n([16, x])) }
 
 assert tar(n([2, 0, 1])) == 2
 assert tar(n([[2, 3], 0, 1])) == [2, 3]
@@ -240,40 +248,40 @@ assert tar(n([1, [2, [4, 0, 1], [1, 4, 0, 1]]])) == 3
 assert tar(n([[18, [1, 77]], 2, [0, 1], [0, 3]])) == 77
 
 x = n([[[1, 2], 3], [4, 4]])
-assert err { tar([x, [3, 0]]) }
-assert err { tar([x, [3, 1]]) }
-assert err { tar([x, [3, 2]]) }
-assert err { tar([x, [3, 3]]) }
-assert err { tar([x, [3, 4]]) }
+assert ill { tar([x, [3, 0]]) }
+assert ill { tar([x, [3, 1]]) }
+assert ill { tar([x, [3, 2]]) }
+assert ill { tar([x, [3, 3]]) }
+assert ill { tar([x, [3, 4]]) }
 assert tar([x, [3, [0, 1]]]) == 0
 assert tar([x, [3, [0, 2]]]) == 0
 assert tar([x, [3, [0, 3]]]) == 0
 assert tar([x, [3, [0, 4]]]) == 0
 assert tar([x, [3, [0, 5]]]) == 1
 
-assert err { tar([x, [4, 0]]) }
-assert err { tar([x, [4, 1]]) }
-assert err { tar([x, [4, 2]]) }
-assert err { tar([x, [4, 3]]) }
-assert err { tar([x, [4, 4]]) }
-assert err { tar([x, [4, [0, 1]]]) }
-assert err { tar([x, [4, [0, 2]]]) }
-assert err { tar([x, [4, [0, 3]]]) }
-assert err { tar([x, [4, [0, 4]]]) }
+assert ill { tar([x, [4, 0]]) }
+assert ill { tar([x, [4, 1]]) }
+assert ill { tar([x, [4, 2]]) }
+assert ill { tar([x, [4, 3]]) }
+assert ill { tar([x, [4, 4]]) }
+assert ill { tar([x, [4, [0, 1]]]) }
+assert ill { tar([x, [4, [0, 2]]]) }
+assert ill { tar([x, [4, [0, 3]]]) }
+assert ill { tar([x, [4, [0, 4]]]) }
 assert tar([x, [4, [0, 5]]]) == 4
 
-assert err { tar([x, [5, 0]]) }
-assert err { tar([x, [5, 1]]) }
-assert err { tar([x, [5, 2]]) }
-assert err { tar([x, [5, 3]]) }
-assert err { tar([x, [5, 4]]) }
+assert ill { tar([x, [5, 0]]) }
+assert ill { tar([x, [5, 1]]) }
+assert ill { tar([x, [5, 2]]) }
+assert ill { tar([x, [5, 3]]) }
+assert ill { tar([x, [5, 4]]) }
 assert tar([x, [5, [0, 1]]]) == 1
 assert tar([x, [5, [0, 2]]]) == 1
 assert tar([x, [5, [0, 3]]]) == 0
 assert tar([x, [5, [0, 4]]]) == 1
-assert err { tar([x, [5, [0, 5]]]) }
-assert err { tar([x, [5, [0, 6]]]) }
-assert err { tar([x, [5, [0, 7]]]) }
+assert ill { tar([x, [5, [0, 5]]]) }
+assert ill { tar([x, [5, [0, 6]]]) }
+assert ill { tar([x, [5, [0, 7]]]) }
 
 assert tar(n([1, [6, [1, 0], [1, 2], [1, 3]]])) == 2
 assert tar(n([1, [6, [1, 1], [1, 2], [1, 3]]])) == 3
@@ -302,10 +310,12 @@ assert tar(n([[1, 2], 10, [18, [4, 0, 3]], [4, 0, 3]])) == 3
 assert tar(n(['a' as char, 10, 18, [4, 0, 1]])) == 98
 assert tar(n([Long.MAX_VALUE, 10, [18, [4, 0, 1]], [4, 0, 1]])) == 9_223_372_036_854_775_808
 
-assert err { lus(n([1, 2])) }
-assert err { tis(n(1)) }
-assert err { fas(n(1)) }
-assert err { tar(n(1)) }
+assert ill { lus(n([1, 2])) }
+assert ill { tis(n(1)) }
+assert ill { fas(n(1)) }
+assert ill { tar(n(1)) }
+
+assert inf { tar(n([[7, [0, 1], [9, 1, [0, 1]]], [9, 1, [0, 1,]]])) }
 
 assert l('[1 2 [3 4] [5 6]]') == [1, 2, [3, 4], [5, 6]]
 assert l('(1 (2 3) (4 5 6))') == [1, [2, 3], [4, 5, 6]]
